@@ -1,14 +1,26 @@
 package oj
 
-import oj.beans.Question
-import oj.beans.Quiz
+import oj.beans.Company
+import oj.beans.Entity
+import oj.beans.Project
+import oj.beans.User
+import oj.beans.Work
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Component
 
 @Component
-interface QuestionDB extends MongoRepository<Question, String> {
-    List<Question> findByQuizId(String quizId)
+interface WorkDB extends MongoRepository<Work, String> {
 }
 @Component
-interface QuizDB extends MongoRepository<Quiz, String> {
+interface CompanyDB extends MongoRepository<Company, String> {
+}
+@Component
+interface ProjectDB extends MongoRepository<Project, String> {
+}
+@Component
+interface UserDB extends MongoRepository<User, String> {
+}
+
+interface EntityDB<T extends Entity> extends MongoRepository<? extends Entity, String> {
+    List<T> findByUserId(String userId)
 }

@@ -1,9 +1,13 @@
 package oj
 
 import groovy.util.logging.Slf4j
+import oj.beans.Entity
 import oj.beans.Question
 import oj.beans.Quiz
+import oj.beans.Work
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -26,52 +30,76 @@ import java.security.Principal
 @RestController
 @Slf4j
 class RestService {
-    @Autowired QuizDB quizDB
-    @Autowired QuestionDB questionDB
+    @Autowired WorkDB workDB
+    @Autowired ProjectDB projectDB
+    @Autowired CompanyDB companyDB
+    @Autowired UserDB userDB
 
-    @DeleteMapping("/question")
-    public void deleteQuestionsForQuiz(@RequestParam String quizId, Principal principal) {
+    // def LOGGED_IN = "isAuthenticated()"
+
+    public void deleteItem(EntityDB db,  String id, Principal principal) {
         String userId = getUserId(principal)
-        def list = questionDB.findByQuizId(quizId)
-        assert (list.get(0).userId == userId)
-        for (Question item : list) {
-           questionDB.delete(item.id)
-        }
+        Entity item = (Entity) db.findOne(id)
+        assert (item.userId == userId)
+        db.delete(id)
     }
-    @GetMapping("/question")
-    public List<Question> getQuestionsForQuiz(@RequestParam String quizId, Principal principal) {
+    Entity getItem(EntityDB db, String id, Principal principal) {
         String userId = getUserId(principal)
-        def list = questionDB.findByQuizId(quizId)
-        assert (list.get(0).userId == userId)
-        return list
+        def item = (Entity) db.findOne(id)
+        assert (item.userId == userId)
+        return item
     }
 
-    @PostMapping("/question")
-    public Question createQuestion(@RequestBody Question question, Principal principal) {
-        question.userId = getUserId(principal)
-        return questionDB.save(question)
+    public List<? extends Entity> getItemsForUser(EntityDB db, String userId, Principal principal) {
+        def item = db.findByUserId(userId)
+        return item
     }
-    @DeleteMapping("/question/{id}")
-    public void deleteQuestion(@PathVariable("id") String id, Principal principal) {
-        log.info "deleting question: " + id
-        questionDB.delete(id)
-    }
-    @DeleteMapping("/quiz")
-    public void deleteQuiz(@RequestParam String id, Principal principal) {
-        log.info "deleting quiz: " + id
-        quizDB.delete(id)
+    public List<? extends Entity> getItems(EntityDB db, Principal principal) {
+        def items = db.findAll()
+        log.debug 'returning' + items.size() + ' items'
+        return items
     }
 
-    @PostMapping("/quiz")
-    public Quiz createQuiz(@RequestBody Quiz quiz, Principal principal) {
-        log.info "creating quiz as user: " + getUserId(principal)
-        quiz.userId = getUserId(principal)
-        return quizDB.save(quiz)
+    Entity createItem(MongoRepository db, Entity item, Principal principal) {
+        item.userId = getUserId(principal)
+        return db.save(item)
     }
 
-    @GetMapping("/quiz")
-    public @ResponseBody List<Quiz> getQuizes(Principal principal) {
-        return quizDB.findAll()
+    @DeleteMapping("/work/{id}")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public void deleteWork(@PathVariable("id") String id, Principal principal) {
+        String userId = getUserId(principal)
+        def item = (Entity) workDB.findOne(id)
+        assert (item.userId == userId)
+        workDB.delete(id)
+    }
+
+    @PostMapping("/work")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public Work createWork(@RequestBody Work work, Principal principal) {
+        String userId = getUserId(principal)
+        work.userId = userId
+        return workDB.save(work)
+    }
+
+    @GetMapping("/work")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public List<Work> getAllWork(Principal principal) {
+        // def items = (List<Work>) this.getItems(workDB, principal)
+        def items = workDB.findAll()
+        log.debug "items: " + items
+        return items
+    }
+    @GetMapping("/work/{id}")
+    public Work getWork(@PathVariable("id") String id, Principal principal) {
+        return (Work) this.getItem(workDB, id, principal)
+    }
+    @GetMapping("/work/user/{id}")
+    public List<Work> getWorkForUser(@PathVariable("id") String userId, Principal principal) {
+        return (List<Work>) this.getItemsForUser(workDB, userId, principal)
     }
     @GetMapping("/users")
     public @ResponseBody String getUsers(Principal principal) {

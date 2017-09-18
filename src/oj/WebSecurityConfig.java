@@ -20,18 +20,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests()
-        //http.authorizeRequests()
-                .antMatchers("/").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "/users").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "/question").permitAll()
-                .antMatchers(HttpMethod.GET, "/question").authenticated()
-                .antMatchers(HttpMethod.POST, "/question").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/question").authenticated()
-                .antMatchers(HttpMethod.OPTIONS, "/quiz").permitAll()
-                .antMatchers(HttpMethod.POST, "/quiz").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/quiz").authenticated()
-                // .antMatchers(HttpMethod.OPTIONS, "/users").permitAll();
-                .antMatchers(HttpMethod.GET, "/users").authenticated();
+                .antMatchers("/").permitAll();
+                //.antMatchers(HttpMethod.OPTIONS, "/work").permitAll()
+                // .antMatchers(HttpMethod.GET, "/work").authenticated()
+                // .antMatchers(HttpMethod.POST, "/work").authenticated()
+                // .antMatchers(HttpMethod.DELETE, "/work").authenticated();
 
         JwtWebSecurityConfigurer .forRS256(audience, issuer) .configure(http);
     }
