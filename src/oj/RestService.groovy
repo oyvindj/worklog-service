@@ -79,6 +79,7 @@ class RestService {
         work.userId = userId
         work.fromDateTime = BL.parseDate(work.date, work.fromTime)
         work.toDateTime = BL.parseDate(work.date, work.toTime)
+        work.duration = BL.getDuration(work)
         return workDB.save(work)
     }
 
@@ -96,7 +97,7 @@ class RestService {
     public List<String> getProjects(Principal principal) {
         def items = workDB.findAll()
         log.debug "items: " + items
-        return Arrays.asList("Cristin", "Sprek", "Worklog", "Vlogger")
+        return Arrays.asList("Cristin", "Sprek", "iKnowBase", "Worklog", "Vlogger", "Support")
     }
 
     @GetMapping("/work")

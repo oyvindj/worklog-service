@@ -15,4 +15,5 @@ class Work extends Entity {
     String toTime
     @JsonProperty(access = JsonProperty.Access.READ_ONLY) Date fromDateTime
     @JsonProperty(access = JsonProperty.Access.READ_ONLY) Date toDateTime
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY) String duration
 }
