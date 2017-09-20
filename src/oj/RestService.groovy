@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.RestController
 import javax.websocket.server.PathParam
 import java.security.Principal
 
-
-@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @Slf4j
 class RestService {
@@ -34,8 +32,6 @@ class RestService {
     @Autowired ProjectDB projectDB
     @Autowired CompanyDB companyDB
     @Autowired UserDB userDB
-
-    // def LOGGED_IN = "isAuthenticated()"
 
     public void deleteItem(EntityDB db,  String id, Principal principal) {
         String userId = getUserId(principal)
@@ -82,6 +78,23 @@ class RestService {
         String userId = getUserId(principal)
         work.userId = userId
         return workDB.save(work)
+    }
+
+    @GetMapping("/company")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public List<String> getCompanies(Principal principal) {
+        def items = workDB.findAll()
+        log.debug "items: " + items
+        return Arrays.asList("Acando", "Fitnesspoint", "Oyvind Johansen")
+    }
+    @GetMapping("/project")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public List<String> getProjects(Principal principal) {
+        def items = workDB.findAll()
+        log.debug "items: " + items
+        return Arrays.asList("Cristin", "Sprek", "Worklog", "Vlogger")
     }
 
     @GetMapping("/work")
