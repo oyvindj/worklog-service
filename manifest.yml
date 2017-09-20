@@ -1,0 +1,8 @@
+applications:
+- name: worklog-service
+  path: build/libs/worklog-service.jar
+  host: oj-worklog-service
+  memory: 1024M
+  env:
+     TZ: europe/oslo
+
