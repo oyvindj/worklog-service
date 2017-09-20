@@ -77,6 +77,8 @@ class RestService {
     public Work createWork(@RequestBody Work work, Principal principal) {
         String userId = getUserId(principal)
         work.userId = userId
+        work.fromDateTime = BL.parseDate(work.date, work.fromTime)
+        work.toDateTime = BL.parseDate(work.date, work.toTime)
         return workDB.save(work)
     }
 

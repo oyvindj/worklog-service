@@ -31,6 +31,7 @@ dependencies {
     compile 'com.auth0:auth0:1.0.0'
     compile 'com.auth0:auth0-spring-security-api:1.0.0-rc.2'
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+	compile 'joda-time:joda-time:2.9.9'
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
