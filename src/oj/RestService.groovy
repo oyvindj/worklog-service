@@ -104,8 +104,7 @@ class RestService {
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
     public List<Work> getAllWork(Principal principal) {
-        // def items = (List<Work>) this.getItems(workDB, principal)
-        def items = workDB.findAll()
+        def items = workDB.findByUserIdOrderByFromDateTimeDesc(getUserId(principal))
         log.debug "items: " + items
         return items
     }

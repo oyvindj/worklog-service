@@ -10,12 +10,17 @@ import org.springframework.stereotype.Component
 
 @Component
 interface WorkDB extends MongoRepository<Work, String> {
+    List<Work> findByUserId(String userId)
+    List<Work> findByUserIdOrderByFromDateTimeDesc(String userId)
 }
 @Component
 interface CompanyDB extends MongoRepository<Company, String> {
+    List<Company> findByUserId(String userId)
 }
 @Component
 interface ProjectDB extends MongoRepository<Project, String> {
+    List<Project> findByUserId(String userId)
+    List<Project> findByCompanyId(String companyId)
 }
 @Component
 interface UserDB extends MongoRepository<User, String> {
