@@ -1,9 +1,12 @@
 package oj
 
 import groovy.util.logging.Slf4j
+import oj.beans.Company
 import oj.beans.Entity
+import oj.beans.Project
 import oj.beans.Question
 import oj.beans.Quiz
+import oj.beans.Todo
 import oj.beans.Work
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.repository.MongoRepository
@@ -32,6 +35,7 @@ class RestService {
     @Autowired ProjectDB projectDB
     @Autowired CompanyDB companyDB
     @Autowired UserDB userDB
+    @Autowired TodoDB todoDB
 
     public void deleteItem(EntityDB db,  String id, Principal principal) {
         String userId = getUserId(principal)
@@ -61,6 +65,54 @@ class RestService {
         return db.save(item)
     }
 
+    @DeleteMapping("/company/{id}")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public void deleteCompany(@PathVariable("id") String id, Principal principal) {
+        String userId = getUserId(principal)
+        def item = (Entity) companyDB.findOne(id)
+        assert (item.userId == userId)
+        companyDB.delete(id)
+    }
+    @DeleteMapping("/project/{id}")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public void deleteProject(@PathVariable("id") String id, Principal principal) {
+        String userId = getUserId(principal)
+        def item = (Entity) projectDB.findOne(id)
+        assert (item.userId == userId)
+        projectDB.delete(id)
+    }
+
+    @GetMapping("/todo")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public List<Todo> getTodos(Principal principal) {
+        def items = todoDB.findByUserId(getUserId(principal))
+        log.debug "items: " + items
+        return items
+    }
+
+    @DeleteMapping("/todo/{id}")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public void deleteTodo(@PathVariable("id") String id, Principal principal) {
+        String userId = getUserId(principal)
+        def item = (Entity) todoDB.findOne(id)
+        assert (item.userId == userId)
+        todoDB.delete(id)
+    }
+
+    @PostMapping("/todo")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public Todo createTodo(@RequestBody Todo item, Principal principal) {
+        String userId = getUserId(principal)
+        item.userId = userId
+        item.date = new Date()
+        return todoDB.save(item)
+    }
+
     @DeleteMapping("/work/{id}")
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
@@ -82,22 +134,51 @@ class RestService {
         work.duration = BL.getDuration(work)
         return workDB.save(work)
     }
+    @PostMapping("/company")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public Company createCompany(@RequestBody Company data, Principal principal) {
+        String userId = getUserId(principal)
+        data.userId = userId
+        data.createdDate = new Date()
+        return companyDB.save(data)
+    }
 
     @GetMapping("/company")
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
-    public List<String> getCompanies(Principal principal) {
-        def items = workDB.findAll()
+    public List<Company> getCompanies(Principal principal) {
+        def items = companyDB.findAll()
         log.debug "items: " + items
-        return Arrays.asList("Acando", "Fitnesspoint", "Oyvind Johansen")
+        return items
+        // return Arrays.asList("Acando", "Fitnesspoint", "Oyvind Johansen")
+    }
+    @PostMapping("/project")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public Project createProject(@RequestBody Project data, Principal principal) {
+        String userId = getUserId(principal)
+        data.userId = userId
+        data.createdDate = new Date()
+        return projectDB.save(data)
     }
     @GetMapping("/project")
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
-    public List<String> getProjects(Principal principal) {
-        def items = workDB.findAll()
+    public List<Project> getAllProjects(Principal principal) {
+        def items = projectDB.findAll()
         log.debug "items: " + items
-        return Arrays.asList("Cristin", "Sprek", "iKnowBase", "Worklog", "Vlogger", "Support")
+        return items
+        // return Arrays.asList("Cristin", "Sprek", "iKnowBase", "Worklog", "Vlogger", "Support")
+    }
+    @GetMapping("/companyproject")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public List<Project> getProjects(@RequestParam("companyId") String companyId, Principal principal) {
+        def items = projectDB.findByCompanyId(companyId)
+        log.debug "items: " + items
+        return projectDB.findByCompanyId(companyId)
+        // return Arrays.asList("Cristin", "Sprek", "iKnowBase", "Worklog", "Vlogger", "Support")
     }
 
     @GetMapping("/work")

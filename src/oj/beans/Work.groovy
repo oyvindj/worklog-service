@@ -5,8 +5,8 @@ import groovy.transform.ToString
 
 @ToString
 class Work extends Entity {
-    String project
-    String company
+    String projectId
+    String companyId
     Double hours
     Date date
     String description
