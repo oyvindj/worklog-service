@@ -17,6 +17,7 @@ interface TodoDB extends MongoRepository<Todo, String> {
 interface WorkDB extends MongoRepository<Work, String> {
     List<Work> findByUserId(String userId)
     List<Work> findByUserIdOrderByFromDateTimeDesc(String userId)
+    List<Work> findByUserIdAndDateBetween(String userId, Date start, Date end)
 }
 @Component
 interface CompanyDB extends MongoRepository<Company, String> {

@@ -8,6 +8,7 @@ import oj.beans.Question
 import oj.beans.Quiz
 import oj.beans.Todo
 import oj.beans.Work
+import oj.util.DateUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.security.access.prepost.PreAuthorize
@@ -181,6 +182,16 @@ class RestService {
         // return Arrays.asList("Cristin", "Sprek", "iKnowBase", "Worklog", "Vlogger", "Support")
     }
 
+    @GetMapping("/work/thisweek")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public List<Work> getWorkThisWeek(Principal principal) {
+        def start = DateUtil.getStartOfCurrentWeek()
+        def end = DateUtil.getEndOfCurrentWeek()
+        def items = workDB.findByUserIdAndDateBetween(getUserId(principal), start, end)
+        log.debug "items: " + items
+        return items
+    }
     @GetMapping("/work")
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
