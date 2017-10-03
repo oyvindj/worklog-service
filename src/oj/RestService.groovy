@@ -9,6 +9,7 @@ import oj.beans.Quiz
 import oj.beans.Todo
 import oj.beans.Work
 import oj.util.DateUtil
+import oj.util.SortUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.security.access.prepost.PreAuthorize
@@ -28,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController
 
 import javax.websocket.server.PathParam
 import java.security.Principal
+import java.util.stream.Collector
+import java.util.stream.Collectors
 
 @RestController
 @Slf4j
@@ -88,22 +91,40 @@ class RestService {
     @GetMapping("/todo")
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
-    public List<Todo> getTodos(Principal principal) {
+    public List<Todo> getTodos(
+            @RequestParam(defaultValue = "999") Integer limit,
+            @RequestParam(defaultValue = "date_desc") String order,
+            Principal principal) {
+        // Comparator<Todo> byDescription = (t1, t2) -> t1.description.compareTo(t2.description)
+
         def items = todoDB.findByUserId(getUserId(principal))
         log.debug "items: " + items
-        return items
+        return items.stream().limit(limit).sorted(SortUtil.getComparator(order)).collect(Collectors.toList())
     }
+
 
     @DeleteMapping("/todo/{id}")
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
-    public void deleteTodo(@PathVariable("id") String id, Principal principal) {
+    public void deleteTodo(
+            @PathVariable("id") String id,
+            Principal principal) {
         String userId = getUserId(principal)
         def item = (Entity) todoDB.findOne(id)
         assert (item.userId == userId)
         todoDB.delete(id)
     }
 
+    @PutMapping("/todo")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public Todo updateTodo(@RequestBody Todo item, Principal principal) {
+        assert(item.id != null)
+        String userId = getUserId(principal)
+        item.userId = userId
+        item.date = new Date()
+        return todoDB.save(item)
+    }
     @PostMapping("/todo")
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
