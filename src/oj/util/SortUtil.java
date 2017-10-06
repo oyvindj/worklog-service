@@ -1,6 +1,7 @@
 package oj.util;
 
 import oj.beans.Todo;
+import oj.beans.Work;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -9,6 +10,38 @@ import java.util.List;
 import static java.util.Comparator.comparing;
 
 public class SortUtil {
+    public static Comparator<Work> getWorkComparator(String sortKey) {
+        String key = sortKey.split("_")[0];
+        String order = null;
+        if(sortKey.split("_").length > 1) {
+            order = sortKey.split("_")[1];
+        }
+        Comparator<Work> comparator = null;
+        switch (key) {
+            case "description":
+                comparator = (t1, t2) -> t1.getDescription().compareToIgnoreCase(t2.getDescription());
+                break;
+            case "date":
+                comparator = (t1, t2) -> t2.getDate().compareTo(t1.getDate());
+                break;
+            case "projectId":
+                comparator = comparing(Work::getProjectId);
+                break;
+            case "companyId":
+                comparator = comparing(Work::getCompanyId);
+                break;
+            case "nickname":
+                comparator = comparing(Work::getNickname);
+                break;
+            default:
+                comparator = comparing(Work::getId);
+                break;
+        }
+        if((order != null) && isReversed(order)) {
+            comparator = comparator.reversed();
+        }
+        return comparator;
+    }
     public static Comparator<Todo> getComparator(String sortKey) {
         String key = sortKey.split("_")[0];
         String order = null;
@@ -18,11 +51,19 @@ public class SortUtil {
         Comparator<Todo> comparator = null;
         switch (key) {
             case "description":
-                // comparator = comparing(Todo::getDescription);
                 comparator = (t1, t2) -> t1.getDescription().compareToIgnoreCase(t2.getDescription());
+                break;
+            case "date":
+                comparator = (t1, t2) -> t2.getDate().compareTo(t1.getDate());
+                break;
+            case "projectId":
+                comparator = comparing(Todo::getProjectId);
                 break;
             case "companyId":
                 comparator = comparing(Todo::getCompanyId);
+                break;
+            case "nickname":
+                comparator = comparing(Todo::getNickname);
                 break;
             default:
                 comparator = comparing(Todo::getId);

@@ -93,13 +93,11 @@ class RestService {
     @PreAuthorize("isAuthenticated()")
     public List<Todo> getTodos(
             @RequestParam(defaultValue = "999") Integer limit,
-            @RequestParam(defaultValue = "date_desc") String order,
+            @RequestParam(defaultValue = "id_desc") String order,
             Principal principal) {
-        // Comparator<Todo> byDescription = (t1, t2) -> t1.description.compareTo(t2.description)
-
         def items = todoDB.findByUserId(getUserId(principal))
         log.debug "items: " + items
-        return items.stream().limit(limit).sorted(SortUtil.getComparator(order)).collect(Collectors.toList())
+        return items.stream().sorted(SortUtil.getComparator(order)).limit(limit).collect(Collectors.toList())
     }
 
 
@@ -143,6 +141,19 @@ class RestService {
         def item = (Entity) workDB.findOne(id)
         assert (item.userId == userId)
         workDB.delete(id)
+    }
+
+    @PutMapping("/work")
+    @CrossOrigin
+    @PreAuthorize("isAuthenticated()")
+    public Work updateWork(@RequestBody Work work, Principal principal) {
+        String userId = getUserId(principal)
+        assert work.userId.equals(userId)
+        assert(work.id != null)
+        work.fromDateTime = BL.parseDate(work.date, work.fromTime)
+        work.toDateTime = BL.parseDate(work.date, work.toTime)
+        work.duration = BL.getDuration(work)
+        return workDB.save(work)
     }
 
     @PostMapping("/work")
@@ -216,10 +227,14 @@ class RestService {
     @GetMapping("/work")
     @CrossOrigin
     @PreAuthorize("isAuthenticated()")
-    public List<Work> getAllWork(Principal principal) {
+    public List<Work> getAllWork(
+            @RequestParam(defaultValue = "999") Integer limit,
+            @RequestParam(defaultValue = "id_desc") String order,
+            Principal principal) {
         def items = workDB.findByUserIdOrderByFromDateTimeDesc(getUserId(principal))
         log.debug "items: " + items
-        return items
+        return items.stream().sorted(SortUtil.getWorkComparator(order)).limit(limit).collect(Collectors.toList())
+        // return items
     }
     @GetMapping("/work/{id}")
     public Work getWork(@PathVariable("id") String id, Principal principal) {
